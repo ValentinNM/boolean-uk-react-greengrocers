@@ -67,32 +67,89 @@ const initialStoreItems = [
   }
 ]
 
-const userCartItems = [
-  {
-    item: {
-      id: '001-beetroot',
-      name: 'Beetroot',
-      price: 0.33
-    },
-    quantity: 8
-  },
-  {
-    item2: {
-      id: '001-beetroot',
-      name: 'Beetroot',
-      price: 0.33
-    },
-    quantity: 8
-  }
-]
-
 export default function App() {
   // Setup state here...
 
   const [storeItems, setStoreItems] = useState(initialStoreItems)
-  const [cartItems, setCartItems] = useState(userCartItems)
+  const [cartItems, setCartItems] = useState([])
+  const [total, setTotal] = useState(0)
+  // console.log('storeItems: ', storeItems, 'cartItems: ', cartItems)
 
-  console.log('storeItems: ', storeItems, 'cartItems: ', cartItems)
+  // const addToCart = item => {
+  const addToCart = storeItem => {
+    console.log('inside add to cart :', storeItems, cartItems)
+
+    let foundItem = false
+
+    const updatingCartItems = cartItems.map(cartItem => {
+      if (storeItem.id === cartItem.item.id) {
+        const updatedCartItem = {
+          ...cartItem,
+          quantity: cartItem.quantity + 1
+        }
+
+        foundItem = true
+
+        return updatedCartItem
+      } else {
+        return cartItem
+      }
+    })
+
+    if (!foundItem) {
+      const creatingCartItem = {
+        item: storeItem,
+        quantity: 1
+      }
+
+      console.log('Item not Found')
+
+      setCartItems([...cartItems, creatingCartItem])
+    } else {
+      console.log('Updated Items: ', updatingCartItems)
+
+      setCartItems(updatingCartItems)
+    }
+  }
+
+  const decreaseQuantity = cartItem => {
+    console.log('cartItem: ', cartItem)
+
+    // cartItem.filter(quantity => )
+
+    // const quantity = cartItems.filter()
+    if (cartItem.quantity === 1) {
+      cartItem.splice(1)
+    } else {
+      cartItem.quantity -= 1
+    }
+    // setCartItems()
+  }
+
+  const increaseQuantity = cartItem => {
+    console.log('cartItem: ', cartItem)
+    let quantity = 0
+    cartItem.quantity += 1
+    // if (cartItem.quantity !== 0) {
+    //   const addQuant = {
+    //     ...cartItem,
+    //     quantity: cartItem.quantity + 1
+    //   }
+    // setCartItems(addQuant)
+    // }
+  }
+
+  const cartTotal = price => {
+    const totalAmount = cartItems.map(cartItem => {
+      console.log('total cartItem: ', cartItem.item.price)
+
+      let totalToUpdate = total
+
+      totalToUpdate += cartItem.item.price
+
+      setTotal(totalToUpdate)
+    })
+  }
 
   return (
     <>
@@ -101,16 +158,20 @@ export default function App() {
         <ul className="item-list store--item-list">
           {
             /* Wrtite some code here... */
-            storeItems.map(item => {
+            storeItems.map((item, index) => {
+              // console.log("item here is: ", item)
               return (
-                <li>
+                <li key={index}>
                   <div className="store--item-icon">
                     <img
                       src={`../assets/icons/${item.id}.svg`}
-                      alt="storeItem"
+                      alt={item.id}
                     ></img>
                   </div>
-                  <button> add to cart </button>
+                  <button onClick={() => addToCart(item)}>
+                    {/* {' '} */}
+                    add to cart
+                  </button>
                 </li>
               )
             })
@@ -123,17 +184,32 @@ export default function App() {
           <ul className="item-list cart--item-list">
             {
               /* Wrtite some code here... */
-              storeItems.map((item, cartItems) => {
+              cartItems.map((cartItem, storeItem) => {
+                console.log('cartItem: ', cartItem)
+                console.log('storeItem: ', storeItem)
                 return (
                   <li>
                     <img
                       className="cart--item-icon"
-                      src={`../assets/icons/${item.id}.svg`}
-                      alt="item.id"
+                      src={`../assets/icons/${cartItem.item.id}.svg`}
+                      alt={'storeItem.id'}
                     />
-                    {item.name}
-                    <button className="remove-btn"> </button>
-                    <button className="add-button"> </button>
+                    {cartItem.item.name}
+                    <button
+                      className="remove-btn"
+                      onClick={() => decreaseQuantity(cartItem)}
+                    >
+                      {' '}
+                      -{' '}
+                    </button>
+                    <div className="quantity-text">{cartItem.quantity}</div>
+                    <button
+                      className="add-button"
+                      onClick={() => increaseQuantity(cartItem)}
+                    >
+                      {' '}
+                      +{' '}
+                    </button>
                   </li>
                 )
               })
@@ -145,7 +221,10 @@ export default function App() {
             <h3>Total</h3>
           </div>
           <div>
-            <span className="total-number">£0.00</span>
+            <span className="total-number">
+              £0.00
+              {cartTotal(cartTotal)}
+            </span>
           </div>
         </div>
       </main>
